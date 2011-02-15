@@ -19,7 +19,7 @@ The usual Rails installation directions applies. If you're unfamiliar with
 Rails this means:
 
     git clone git://github.com/jacobat/Knockout-On-Rails.git
-    cd knockoutonrails
+    cd Knockout-On-Rails
     bundle
     rake db:setup
 
@@ -28,3 +28,5 @@ Rails this means:
 Go to the directory you cloned and run:
 
     rails server
+
+And point your browser at `localhost:3000`
