@@ -28,6 +28,9 @@
 <br>
 <div data-bind="visible: userFilters().length > 0">
   Filtered: <div data-bind="text: userFilters()"></div>
+  <a href="#" onclick="javascript: viewModel.userFilters.pop(); return false;">
+    Remove last filter
+  </a>
 </div>
 
 <br />
