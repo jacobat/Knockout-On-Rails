@@ -18,7 +18,7 @@ To get the code up and running you will need:
 The usual Rails installation directions applies. If you're unfamiliar with
 Rails this means:
 
-    git clone ...
+    git clone git://github.com/jacobat/Knockout-On-Rails.git
     cd knockoutonrails
     bundle
     rake db:setup
