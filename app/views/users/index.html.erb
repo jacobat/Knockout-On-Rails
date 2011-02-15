@@ -1,5 +1,8 @@
 <h1>Listing users</h1>
 
+<%= link_to 'Sort by name', nil, :onclick => 'viewModel.sortByName(); return false;' %> |
+<%= link_to 'Sort by email', nil, :onclick => 'viewModel.sortByEmail(); return false;' %>
+
 <table>
   <thead>
     <tr>
@@ -10,40 +13,67 @@
       <th></th>
     </tr>
   </thead>
-  <tbody data-bind='template: "userTemplate"'>
+  <tbody data-bind='template: { name: "userTemplate", foreach: filteredUsers }'>
   </tbody>
 </table>
+
+<br>
+
+<form>
+  <label>Filter name</label>
+  <input name="name_filter" />
+  <button onclick="javascript: viewModel.userFilters.push($(this).parent().find('input').val()); $(this).parent().find('input').val(''); return false;">Filter</button>
+</form>
+
+<br>
+<div data-bind="visible: userFilters().length > 0">
+  Filtered: <div data-bind="text: userFilters()"></div>
+</div>
 
 <br />
 
 <%= link_to 'New User', new_user_path %>
 
 <script type="text/html" charset="utf-8" id="userTemplate">
-  {{each filteredUsers}}
-    <tr>
-      <td>${ user.name }</td>
-      <td>${ user.email }</td>
-      <td><%= link_to 'Show', user_path_js('${user.id}') %></td>
-      <td><%= link_to 'Edit', edit_user_path_js('${user.id}') %></td>
-      <td><%= link_to 'Destroy', user_path_js('${user.id}'), :confirm => 'Are you sure?', :method => :delete %></td>
-    </tr>
-  {{/each}}
+  <tr>
+    <td>${ user.name }</td>
+    <td>${ user.email }</td>
+    <td><%= link_to 'Show', user_path_js('${user.id}') %></td>
+    <td><%= link_to 'Edit', edit_user_path_js('${user.id}') %></td>
+    <td><%= link_to 'Destroy', user_path_js('${user.id}'), :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
 </script>
 
 <script type="text/javascript" charset="utf-8">
   var users = <%= raw @users.to_json %>
+
   var observable_users = $.map(users, function(elem) {
     elem.user.hidden = ko.observable(false);
     return elem;
   });
+
   var viewModel = {
     users: ko.observableArray(observable_users),
     userFilters: ko.observableArray([]),
-  }
+  };
+
+  viewModel.sortByName = function() {
+    viewModel.users.sort(function(a, b) {
+      return (a.user.name > b.user.name ? 1 : -1);
+    });
+  };
+
+  viewModel.sortByEmail = function() {
+    viewModel.users.sort(function(a, b) {
+      return (a.user.email > b.user.email ? 1 : -1);
+    });
+  };
+
   viewModel.filteredUsers = ko.dependentObservable(function() {
     return $.grep(viewModel.users(), function(element) {
       return $.inArray(element.user.name, viewModel.userFilters()) < 0;
     });
   });
+
   ko.applyBindings(viewModel);
 </script>
