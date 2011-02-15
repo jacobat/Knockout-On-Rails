@@ -1,7 +1,25 @@
+<h2>The time is now <span data-bind="text: time"></span></h2>
+
 <h1>Listing users</h1>
 
 <%= link_to 'Sort by name', nil, :onclick => 'viewModel.sortByName(); return false;' %> |
 <%= link_to 'Sort by email', nil, :onclick => 'viewModel.sortByEmail(); return false;' %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody data-bind='template: { name: "userTemplate", foreach: last5 }'>
+  </tbody>
+</table>
+
+<br>
 
 <table>
   <thead>
@@ -50,14 +68,10 @@
 <script type="text/javascript" charset="utf-8">
   var users = <%= raw @users.to_json %>
 
-  var observable_users = $.map(users, function(elem) {
-    elem.user.hidden = ko.observable(false);
-    return elem;
-  });
-
   var viewModel = {
-    users: ko.observableArray(observable_users),
+    users: ko.observableArray(users),
     userFilters: ko.observableArray([]),
+    time: ko.observable(new Date())
   };
 
   viewModel.sortByName = function() {
@@ -72,11 +86,49 @@
     });
   };
 
+  viewModel.userIds = ko.dependentObservable(function() {
+    return viewModel.users().map(function(user) {
+      return user.user.id
+    });
+  }, viewModel);
+
   viewModel.filteredUsers = ko.dependentObservable(function() {
-    return $.grep(viewModel.users(), function(element) {
+    return $.grep(this.users(), function(element) {
       return $.inArray(element.user.name, viewModel.userFilters()) < 0;
     });
+  }, viewModel);
+
+
+  viewModel.last5 = ko.dependentObservable(function() {
+    return viewModel.filteredUsers().slice(-5);
+  }, viewModel);
+
+  viewModel.filteredUsers.subscribe(function(users) {
+    console.log('There\'s now ' + users.length + ' users visible');
   });
 
+  viewModel.users.subscribe(function(users) {
+    console.log('There\'s now ' + users.length + ' users total');
+  });
+
+  function updateTime() {
+    viewModel.time(new Date());
+  };
+
+  function loadUsers() {
+    $.getJSON('/users.json', function(data) {
+      var userIds = viewModel.userIds();
+      var users = $.grep(data, function(elem) {
+        return userIds.indexOf(elem.user.id) == -1;
+      });
+      $.each(users, function(index, user) {
+        viewModel.users.push(user);
+      });
+    });
+  };
+
   ko.applyBindings(viewModel);
+  
+  setInterval('loadUsers()',3000);
+  setInterval('updateTime()',1000);
 </script>
