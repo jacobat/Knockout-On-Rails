@@ -5,6 +5,8 @@
 <%= link_to 'Sort by name', nil, :onclick => 'viewModel.sortByName(); return false;' %> |
 <%= link_to 'Sort by email', nil, :onclick => 'viewModel.sortByEmail(); return false;' %>
 
+<span data-bind="visible: loading()"><em>Loading</em></span>
+
 <table>
   <thead>
     <tr>
@@ -71,7 +73,8 @@
   var viewModel = {
     users: ko.observableArray(users),
     userFilters: ko.observableArray([]),
-    time: ko.observable(new Date())
+    time: ko.observable(new Date()),
+    loading: ko.observable(false)
   };
 
   viewModel.sortByName = function() {
@@ -118,6 +121,7 @@
   };
 
   function loadUsers() {
+    viewModel.loading(true);
     $.getJSON('/users.json', function(data) {
       var userIds = viewModel.userIds();
       var users = $.grep(data, function(elem) {
@@ -126,6 +130,7 @@
       $.each(users, function(index, user) {
         viewModel.users.push(user);
       });
+      viewModel.loading(false);
     });
   };
 
