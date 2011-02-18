@@ -87,7 +87,7 @@
   };
 
   viewModel.userIds = ko.dependentObservable(function() {
-    return viewModel.users().map(function(user) {
+    return $.map(viewModel.users(), function(user) {
       return user.user.id
     });
   }, viewModel);
@@ -104,11 +104,13 @@
   }, viewModel);
 
   viewModel.filteredUsers.subscribe(function(users) {
-    console.log('There\'s now ' + users.length + ' users visible');
+    try { console.log('There\'s now ' + users.length + ' users visible'); }
+    catch(e) {}
   });
 
   viewModel.users.subscribe(function(users) {
-    console.log('There\'s now ' + users.length + ' users total');
+    try { console.log('There\'s now ' + users.length + ' users total'); }
+    catch(e) {}
   });
 
   function updateTime() {
@@ -119,7 +121,7 @@
     $.getJSON('/users.json', function(data) {
       var userIds = viewModel.userIds();
       var users = $.grep(data, function(elem) {
-        return userIds.indexOf(elem.user.id) == -1;
+        return $.inArray(elem.user.id, userIds) == -1;
       });
       $.each(users, function(index, user) {
         viewModel.users.push(user);
